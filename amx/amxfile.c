@@ -111,7 +111,7 @@
     #if defined __WATCOMC__
       #define t_stat    _stat
     #else
-      #define t_stat    __stat
+      #define t_stat    _stat
     #endif
   #else
     #define t_stat      stat
