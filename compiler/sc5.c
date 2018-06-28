@@ -82,7 +82,7 @@ SC_FUNC int error(long number,...)
 static char *prefix[3]={ "error", "fatal error", "warning" };
 static int lastline,errorcount;
 static short lastfile;
-  const unsigned char *msg,*pre;
+  const char *msg,*pre;
   const char *filename;
   va_list argptr;
   char string[256];
@@ -138,7 +138,7 @@ static short lastfile;
     assert(notice<sizearray(noticemsg));
     strcat(string,"; ");
     len=(int)strlen(string);
-    strexpand(string+len,(unsigned char *)noticemsg[notice],sizeof string-len-1,SCPACK_TABLE);
+    strexpand(string+len,noticemsg[notice],sizeof string-len-1,SCPACK_TABLE);
   } /* if */
   strcat(string,"\n");
 

@@ -30,8 +30,8 @@
 SC_VDEFINE symbol loctab;                   /* local symbol table */
 SC_VDEFINE symbol glbtab;                   /* global symbol table */
 SC_VDEFINE cell *litq;                      /* the literal queue */
-SC_VDEFINE unsigned char *srcline=NULL;     /* the line read from the input file */
-SC_VDEFINE const unsigned char *lptr;       /* points to the current position in "srcline" */
+SC_VDEFINE char *srcline=NULL;     /* the line read from the input file */
+SC_VDEFINE char *lptr;       /* points to the current position in "srcline" */
 SC_VDEFINE constvalue tagname_tab = { NULL, "", 0, 0};  /* tagname table */
 SC_VDEFINE constvalue libname_tab = { NULL, "", 0, 0};  /* library table (#pragma library "..." syntax) */
 SC_VDEFINE constvalue *curlibrary = NULL;   /* current library */

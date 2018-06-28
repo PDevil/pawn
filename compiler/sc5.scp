@@ -17,7 +17,7 @@
  *  Version: $Id: sc5.sch 5579 2016-09-12 07:58:43Z  $
  */
 
-SC_FUNC int strexpand(char *dest, const unsigned char *source, int maxlen, const unsigned char pairtable[128][2]);
+SC_FUNC int strexpand(char *dest, const char *source, int maxlen, const unsigned char pairtable[128][2]);
 
 #define SCPACK_TABLE errstr_table
 /*-*SCPACK start of pair table, do not change or remove this line */
@@ -33,7 +33,7 @@ const unsigned char errstr_table[][2] = {
 };
 /*-*SCPACK end of pair table, do not change or remove this line */
 
-static const unsigned char *errmsg[] = {
+static const char *errmsg[] = {
 #ifdef SCPACK
 /*000*/  "*",   /* scpack does not like empty strings */
 /*001*/  "expected token: \"%s\", but found \"%s\"",
@@ -235,7 +235,7 @@ static const unsigned char *errmsg[] = {
 #endif
        };
 
-static const unsigned char *fatalmsg[] = {
+static const char *fatalmsg[] = {
 #ifdef SCPACK
 /*100*/  "cannot read from file: \"%s\"",
 /*101*/  "cannot write to file: \"%s\"",
@@ -273,7 +273,7 @@ static const unsigned char *fatalmsg[] = {
 #endif
        };
 
-static const unsigned char *warnmsg[] = {
+static const char *warnmsg[] = {
 #ifdef SCPACK
 /*200*/  "symbol \"%s\" is truncated to %d characters",
 /*201*/  "redefinition of constant/macro (symbol \"%s\")",
@@ -357,7 +357,7 @@ static const unsigned char *warnmsg[] = {
 #endif
        };
 
-static const unsigned char *noticemsg[] = {
+static const char *noticemsg[] = {
 #ifdef SCPACK
 /*000*/  "*",   /* scpack does not like empty strings */
 /*001*/  "did you mean \"%s\"?",

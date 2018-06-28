@@ -356,7 +356,7 @@ SC_FUNC stringlist *insert_sourcefile(const char *string)
   return insert_string(&sourcefiles,string,1);
 }
 
-SC_FUNC const char *get_sourcefile(int index)
+SC_FUNC char* get_sourcefile(int index)
 {
   return get_string(&sourcefiles,index);
 }

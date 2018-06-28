@@ -273,7 +273,7 @@ SC_FUNC int cp_set(const char *name)
   return TRUE;
 }
 
-SC_FUNC cell cp_translate(const unsigned char *string,const unsigned char **endptr)
+SC_FUNC cell cp_translate(char *string, char **endptr)
 {
   wchar_t result;
 
@@ -307,8 +307,9 @@ SC_FUNC cell cp_translate(const unsigned char *string,const unsigned char **endp
 
 #endif  /* !defined PAWN_NO_CODEPAGE */
 
+
 #if !defined PAWN_NO_UTF8
-SC_FUNC cell get_utf8_char(const unsigned char *string,const unsigned char **endptr)
+SC_FUNC cell get_utf8_char(char *string,char **endptr)
 {
   int follow=0;
   long lowmark=0;
@@ -394,7 +395,7 @@ SC_FUNC int scan_utf8(FILE *fp,const char *filename)
     static void *resetpos=NULL;
     int utf8=TRUE;
     int firstchar=TRUE,bom_found=FALSE;
-    const unsigned char *ptr;
+    char *ptr;
 
     resetpos=pc_getpossrc(fp,resetpos);
     while (utf8 && pc_readsrc(fp,srcline,sLINEMAX)!=NULL) {
@@ -413,7 +414,7 @@ SC_FUNC int scan_utf8(FILE *fp,const char *filename)
     } /* while */
     pc_resetsrc(fp,resetpos);
     if (bom_found) {
-      unsigned char bom[3];
+      char bom[3];
       pc_readsrc(fp,bom,3);     /* read the BOM again to strip it from the file */
       assert(bom[0]==0xef && bom[1]==0xbb && bom[2]==0xbf);
       if (!utf8)

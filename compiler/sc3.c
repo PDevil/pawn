@@ -31,7 +31,7 @@ static void dropout(int lvalue,void (*testfunc)(int val),int exit1,value *lval);
 static int plnge(const int *opstr,int opoff,int (*hier)(value *lval),value *lval,
                  char *forcetag,int chkbitwise);
 static int plnge1(int (*hier)(value *lval),value *lval);
-static void plnge2(void (*oper)(void),void (*arrayoper)(cell),
+static void plnge2(void (*oper)(),void (*arrayoper)(cell),
                    int (*hier)(value *lval),
                    value *lval1,value *lval2);
 static cell calc(cell left,void (*oper)(),cell right,char *boolresult);

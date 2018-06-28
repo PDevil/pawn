@@ -35,7 +35,7 @@
  *              this token is valid only in the replacement string.
  */
 
-SC_FUNC int strexpand(char *dest, const unsigned char *source, int maxlen, const unsigned char pairtable[128][2]);
+SC_FUNC int strexpand(char *dest, const char *source, int maxlen, const unsigned char pairtable[128][2]);
 
 #define SCPACK_TERMINATOR ,     /* end each section with a comma */
 

@@ -36,10 +36,10 @@
 #define RAWMODE         0x1
 #define UTF8MODE        0x2
 #define ISPACKED        0x4
-static cell litchar(const unsigned char **lptr,int flags);
+static cell litchar(char **lptr,int flags);
 static symbol *find_symbol(const symbol *root,const char *name,int fnumber,int automaton);
 
-static void substallpatterns(unsigned char *line,int buffersize);
+static void substallpatterns(char *line,int buffersize);
 static int match(char *st,int end);
 static int alpha(unsigned char c);
 
@@ -52,7 +52,7 @@ static short icomment;  /* currently in multiline comment? */
 static char ifstack[sCOMP_STACK]; /* "#if" stack */
 static short iflevel;   /* nesting level if #if/#else/#endif */
 static short skiplevel; /* level at which we started skipping (including nested #if .. #endif) */
-static unsigned char term_expr[] = "";
+static const char* term_expr = "";
 static int listline=-1; /* "current line" for the list file */
 
 
@@ -209,7 +209,7 @@ SC_FUNC int plungefile(char *name,int try_currentpath,int try_includepaths)
   return result;
 }
 
-static void check_empty(const unsigned char *lptr)
+static void check_empty(const char *lptr)
 {
   /* verifies that the string contains only whitespace */
   while (*lptr<=' ' && *lptr!='\0')
@@ -307,10 +307,10 @@ static void doinclude(int silent)
  *
  *  Global references: inpf,pc_curline,inpfname,freading,icomment (altered)
  */
-static void readline(unsigned char *line,int append)
+static void readline(char *line,int append)
 {
   int i,cont;
-  unsigned char *ptr;
+  char *ptr;
   symbol *sym;
   size_t num;
 
@@ -370,7 +370,7 @@ static void readline(unsigned char *line,int append)
     } else {
       /* check whether to erase leading spaces */
       if (cont) {
-        unsigned char *ptr=line;
+        char *ptr=line;
         while (*ptr<=' ' && *ptr!='\0')
           ptr++;
         if (ptr!=line)
@@ -378,11 +378,11 @@ static void readline(unsigned char *line,int append)
       } /* if */
       cont=FALSE;
       /* check whether a full line was read */
-      if (strchr((char*)line,'\n')==NULL && !pc_eofsrc(inpf))
+      if (strchr(line,'\n')==NULL && !pc_eofsrc(inpf))
         error(75);      /* line too long */
       /* check if the next line must be concatenated to this line */
-      if ((ptr=(unsigned char*)strchr((char*)line,'\n'))==NULL)
-        ptr=(unsigned char*)strchr((char*)line,'\r');
+      if ((ptr=strchr(line,'\n'))==NULL)
+        ptr=strchr(line,'\r');
       if (ptr!=NULL && ptr>line) {
         assert(*(ptr+1)=='\0'); /* '\n' or '\r' should be last in the string */
         while (ptr>line && *ptr<=' ')
@@ -419,7 +419,7 @@ static void readline(unsigned char *line,int append)
  *
  *  Global references: icomment  (altered)
  */
-static void stripcom(unsigned char *line)
+static void stripcom(char *line)
 {
   char c;
   #if !defined PAWN_LIGHT
@@ -550,9 +550,9 @@ static void stripcom(unsigned char *line)
  *
  *  A boolean value must start with "0b"
  */
-static int btoi(cell *val,const unsigned char *curptr)
+static int btoi(cell *val, char *curptr)
 {
-  const unsigned char *ptr;
+  char *ptr;
   unsigned digitsep=UINT_MAX;
 
   *val=0;
@@ -589,9 +589,9 @@ static int btoi(cell *val,const unsigned char *curptr)
  *  it returns the number of characters processed and the value is stored in
  *  "val". Otherwise it returns 0 and "val" is garbage.
  */
-static int dtoi(cell *val,const unsigned char *curptr)
+static int dtoi(cell *val, char *curptr)
 {
-  const unsigned char *ptr;
+  char *ptr;
   unsigned digitsep=UINT_MAX; /* thousands separator */
 
   *val=0;
@@ -626,9 +626,9 @@ static int dtoi(cell *val,const unsigned char *curptr)
  *  success it returns the number of characters processed and the value is
  *  stored in "val". Otherwise it return 0 and "val" is garbage.
  */
-static int htoi(cell *val,const unsigned char *curptr)
+static int htoi(cell *val, char* curptr)
 {
-  const unsigned char *ptr;
+  char *ptr;
   unsigned digitsep=UINT_MAX;
 
   *val=0;
@@ -681,9 +681,9 @@ static int htoi(cell *val,const unsigned char *curptr)
  *  o  at least one digit must follow the period; "6." is not a valid number,
  *     you should write "6.0"
  */
-static int ftoi(cell *val,const unsigned char *curptr)
+static int ftoi(cell *val,char *curptr)
 {
-  const unsigned char *ptr;
+  char *ptr;
   double fnum,ffrac,fmult;
   unsigned long dnum,dbase;
   int i, ignore;
@@ -815,7 +815,7 @@ static int ftoi(cell *val,const unsigned char *curptr)
  *        for at "hier2()" (in fact, it is viewed as an operator, not as a
  *        sign) and the + is invalid (as in K&R C, and unlike ANSI C).
  */
-static int number(cell *val,const unsigned char *curptr)
+static int number(cell *val, char* curptr)
 {
   int i;
   cell value;
@@ -872,7 +872,7 @@ static int preproc_expr(cell *val,int *tag)
   term=strchr((char*)srcline,'\0');
   assert(term!=NULL);
   chrcat((char*)srcline,PREPROC_TERM);  /* the "DEL" code (see SC.H) */
-  result=constexpr(val,tag,NULL);       /* get value (or 0 on error) */
+  result=constexpr_(val,tag,NULL);       /* get value (or 0 on error) */
   *term='\0';                           /* erase the token (if still present) */
   lexclr(FALSE);                        /* clear any "pushed" tokens */
   litidx=cur_lit;                       /* reset literal pool */
@@ -883,7 +883,7 @@ static int preproc_expr(cell *val,int *tag)
  * Returns returns a pointer behind the closing quote or to the other
  * character that caused the input to be ended.
  */
-static const unsigned char *getstring(unsigned char *dest,int max,const unsigned char *line)
+static char* getstring(char *dest, int max, char *line)
 {
   assert(dest!=NULL && line!=NULL);
   *dest='\0';
@@ -956,7 +956,7 @@ static int command(void)
    * re-read the line
    */
   if (!sc_needsemicolon && stgget(&index,&code_index)) {
-    lptr=term_expr;
+    lptr=(char*)term_expr;
     return CMD_TERM;
   } /* if */
   tok=lex(&val,&str);
@@ -1030,7 +1030,7 @@ static int command(void)
             if (skiplevel==iflevel)
               preproc_expr(&val,NULL);  /* get, but ignore the expression */
             else
-              lptr=(const unsigned char *)strchr((const char *)lptr,'\0');
+              lptr=strchr(lptr,'\0');
           } /* if */
         } else {
           /* previous conditions were all FALSE */
@@ -1041,7 +1041,7 @@ static int command(void)
             if (skiplevel==iflevel) {
               preproc_expr(&val,NULL);  /* get value (or 0 on error) */
             } else {
-              lptr=(const unsigned char *)strchr((const char *)lptr,'\0');
+              lptr=strchr(lptr,'\0');
               val=0;
             } /* if */
             ifstack[iflevel-1]=(char)(val ? PARSEMODE : SKIPMODE);
@@ -1075,7 +1075,7 @@ static int command(void)
   case tpFILE:
     if (!SKIPPING) {
       char pathname[_MAX_PATH];
-      lptr=getstring((unsigned char*)pathname,sizearray(pathname),lptr);
+      lptr=getstring(pathname,sizearray(pathname),lptr);
       if (strlen(pathname)>0) {
         free(inpfname);
         inpfname=duplicatestring(pathname);
@@ -1125,7 +1125,7 @@ static int command(void)
           while (*lptr<=' ' && *lptr!='\0')
             lptr++;
           if (*lptr=='"') {
-            lptr=getstring((unsigned char*)name,sizearray(name),lptr);
+            lptr=getstring(name,sizearray(name),lptr);
           } else {
             int i;
             for (i=0; i<sizearray(name) && alphanum(*lptr); i++,lptr++)
@@ -1151,7 +1151,7 @@ static int command(void)
           pc_deprecate=(char*)malloc(strlen((char*)lptr)+1);
           if (pc_deprecate!=NULL)
             strcpy(pc_deprecate,(char*)lptr);
-          lptr=(unsigned char*)strchr((char*)lptr,'\0'); /* skip to end (ignore "extra characters on line") */
+          lptr=strchr(lptr,'\0'); /* skip to end (ignore "extra characters on line") */
         } else if (strcmp(str,"dynamic")==0) {
           preproc_expr(&pc_stksize,NULL);
         } else if (strcmp(str,"library")==0) {
@@ -1159,7 +1159,7 @@ static int command(void)
           while (*lptr<=' ' && *lptr!='\0')
             lptr++;
           if (*lptr=='"') {
-            lptr=getstring((unsigned char*)name,sizearray(name),lptr);
+            lptr=getstring(name,sizearray(name),lptr);
           } else {
             int i;
             for (i=0; i<sizearray(name) && (alphanum(*lptr) || *lptr=='-'); i++,lptr++)
@@ -1300,7 +1300,7 @@ static int command(void)
     ret=CMD_DEFINE;
     if (!SKIPPING) {
       char *pattern,*substitution;
-      const unsigned char *start,*end;
+      char *start,*end;
       int count,prefixlen,matchbracket,nest;
       const stringpair *def;
       /* find the pattern to match */
@@ -1391,7 +1391,7 @@ static int command(void)
       } /* while */
       substitution[count]='\0';
       /* check whether the definition already exists */
-      for (prefixlen=0,start=(unsigned char*)pattern; alphanum(*start); prefixlen++,start++)
+      for (prefixlen=0,start=pattern; alphanum(*start); prefixlen++,start++)
         /* nothing */;
       assert(prefixlen>0);
       if ((def=find_subst(pattern,prefixlen))!=NULL) {
@@ -1452,7 +1452,7 @@ static int command(void)
 }
 
 #if !defined NO_DEFINE
-static int is_startstring(const unsigned char *string)
+static int is_startstring(const char *string)
 {
   if (*string=='"' || *string=='\'')
     return TRUE;                        /* "..." */
@@ -1466,7 +1466,7 @@ static int is_startstring(const unsigned char *string)
   return FALSE;
 }
 
-static const unsigned char *skipstring(const unsigned char *string)
+static char* skipstring(char* string)
 {
   char endquote;
   int flags=0;
@@ -1485,7 +1485,7 @@ static const unsigned char *skipstring(const unsigned char *string)
   return string;
 }
 
-static const unsigned char *skippgroup(const unsigned char *string)
+static char *skippgroup(char *string)
 {
   int nest=0;
   char open=*string;
@@ -1542,11 +1542,11 @@ SC_FUNC char *strins(char *dest,char *src,size_t srclen)
   return dest;
 }
 
-static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char *substitution)
+static int substpattern(char *line,size_t buffersize,char *pattern,char *substitution)
 {
   int prefixlen;
-  const unsigned char *p,*s,*e;
-  unsigned char *args[10];
+  char *p,*s,*e;
+  char *args[10];
   int match,arg,instring;
   int stringize;
   size_t len;
@@ -1554,7 +1554,7 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
   memset(args,0,sizeof args);
 
   /* check the length of the prefix */
-  for (prefixlen=0,s=(unsigned char*)pattern; alphanum(*s); prefixlen++,s++)
+  for (prefixlen=0,s=pattern; alphanum(*s); prefixlen++,s++)
     /* nothing */;
   assert(prefixlen>0);
   assert(strncmp((char*)line,pattern,prefixlen)==0);
@@ -1563,7 +1563,7 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
    * the parameters
    */
   s=line+prefixlen;
-  p=(unsigned char*)pattern+prefixlen;
+  p=pattern+prefixlen;
   match=TRUE;         /* so far, pattern matches */
   while (match && *s!='\0' && *p!='\0') {
     if (*p=='%') {
@@ -1590,7 +1590,7 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
         if (args[arg]!=NULL)
           free(args[arg]);
         len=(int)(e-s);
-        args[arg]=(unsigned char*)malloc((len+1)*sizeof(unsigned char));
+        args[arg]=(char*)malloc((len+1)*sizeof(char));
         if (args[arg]==NULL)
           error(103); /* insufficient memory */
         strlcpy((char*)args[arg],(char*)s,len+1);
@@ -1636,7 +1636,7 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
     /* if the last character to match is an alphanumeric character, the
      * current character in the source may not be alphanumeric
      */
-    assert(p>(unsigned char*)pattern);
+    assert(p>(char*)pattern);
     if (alphanum(*(p-1)) && alphanum(*s))
       match=FALSE;
   } /* if */
@@ -1644,7 +1644,7 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
   if (match) {
     /* calculate the length of the substituted string */
     instring=0;
-    for (e=(unsigned char*)substitution,len=0; *e!='\0'; e++) {
+    for (e=(char*)substitution,len=0; *e!='\0'; e++) {
       if (*e=='#' && *(e+1)=='%' && isdigit(*(e+2)) && !instring) {
         stringize=1;
         e++;            /* skip '#' */
@@ -1673,7 +1673,7 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
       /* substitute pattern */
       instring=0;
       strdel((char*)line,(int)(s-line));
-      for (e=(unsigned char*)substitution,s=line; *e!='\0'; e++) {
+      for (e=(char*)substitution,s=line; *e!='\0'; e++) {
         if (*e=='#' && *(e+1)=='%' && isdigit(*(e+2)) && !instring) {
           stringize=1;
           e++;            /* skip '#' */
@@ -1713,9 +1713,9 @@ static int substpattern(unsigned char *line,size_t buffersize,char *pattern,char
   return match;
 }
 
-static void substallpatterns(unsigned char *line,int buffersize)
+static void substallpatterns(char *line, int buffersize)
 {
-  unsigned char *start, *end;
+  char *start, *end;
   int prefixlen;
   const stringpair *subst;
 
@@ -1727,7 +1727,7 @@ static void substallpatterns(unsigned char *line,int buffersize)
     while (!alpha(*start) && *start!='\0') {
       /* skip strings */
       if (is_startstring(start)) {
-        start=(unsigned char *)skipstring(start);
+        start=skipstring(start);
         if (*start=='\0')
           break;        /* abort loop on error */
       } /* if */
@@ -1780,10 +1780,10 @@ static void substallpatterns(unsigned char *line,int buffersize)
  *
  *  The function returns 1 if an ellipsis was found and 0 if not
  */
-static int scanellipsis(const unsigned char *lptr)
+static int scanellipsis(const char *lptr)
 {
   static void *inpfmark=NULL;
-  unsigned char *localbuf;
+  char *localbuf;
   short localcomment,found;
 
   /* first look for the ellipsis in the remainder of the string */
@@ -1799,7 +1799,7 @@ static int scanellipsis(const unsigned char *lptr)
    */
   if (inpf==NULL || pc_eofsrc(inpf))
     return 0;           /* quick exit: cannot read after EOF */
-  if ((localbuf=(unsigned char*)malloc((sLINEMAX+1)*sizeof(unsigned char)))==NULL)
+  if ((localbuf=(char*)malloc((sLINEMAX+1)*sizeof(unsigned char)))==NULL)
     return 0;
   inpfmark=pc_getpossrc(inpf,inpfmark);
   localcomment=icomment;
@@ -1873,14 +1873,14 @@ SC_FUNC void preprocess(void)
   } while (iscommand!=CMD_NONE && iscommand!=CMD_TERM && freading); /* enddo */
 }
 
-static void unpackedstring(const unsigned char *str,int flags)
+static void unpackedstring(char *str,int flags)
 {
   while (*str!='\0')
     litadd(litchar(&str,flags | UTF8MODE));  /* litchar() alters "str" */
   litadd(0);                    /* terminate string */
 }
 
-static void packedstring(const unsigned char *str,int flags)
+static void packedstring(char *str,int flags)
 {
   int i;
   ucell val,c;
@@ -1908,7 +1908,7 @@ static void packedstring(const unsigned char *str,int flags)
 static unsigned long pc_indentmask=0;   /* tab/space interval to make up the current indent */
 static unsigned char pc_indentbits=0;   /* bits in pc_indentmask */
 
-SC_FUNC void lex_fetchindent(const unsigned char *string,const unsigned char *pos)
+SC_FUNC void lex_fetchindent(const char *string, const char *pos)
 {
   unsigned long mask=1;
 
@@ -2046,7 +2046,7 @@ SC_FUNC int lexinit(int releaseall)
     _lexstr=NULL;
   } else {
     if (srcline==NULL)
-      srcline=(unsigned char*)malloc((sLINEMAX+1)*sizeof(unsigned char));
+      srcline=(char*)malloc((sLINEMAX+1)*sizeof(char));
     if (_lexstr==NULL)
       _lexstr=(char*)malloc((sLINEMAX+1)*sizeof(char));
     if (srcline==NULL || _lexstr==NULL)
@@ -2076,7 +2076,7 @@ SC_FUNC int lex(cell *lexvalue,char **lexsym)
 {
   int i,toolong,newline;
   char **tokptr;
-  const unsigned char *starttoken;
+  char *starttoken;
 
   assert(lexvalue!=NULL);
   assert(lexsym!=NULL);
@@ -2285,9 +2285,9 @@ SC_FUNC int lex(cell *lexvalue,char **lexsym)
       } /* if */
     } /* for */
     if ((stringflags & ISPACKED)!=0)
-      packedstring((unsigned char*)_lexstr,stringflags);
+      packedstring(_lexstr,stringflags);
     else
-      unpackedstring((unsigned char*)_lexstr,stringflags);
+      unpackedstring(_lexstr,stringflags);
   } else if (*lptr=='\'' || *lptr=='`') {       /* character literal */
     lptr+=1;            /* skip quote */
     _lextok=tNUMBER;
@@ -2298,7 +2298,7 @@ SC_FUNC int lex(cell *lexvalue,char **lexsym)
       /* try to skip up to the next quote (this may be a user mixing up
        * single and double quotes)
        */
-      const unsigned char *ptr=lptr;
+      char *ptr=lptr;
       while (*ptr!='\0' && *ptr!='\'')
         ptr++;
       if (*ptr=='\'') {
@@ -2356,7 +2356,7 @@ SC_FUNC void lexclr(int clreol)
 {
   _pushed=FALSE;
   if (clreol) {
-    lptr=(unsigned char*)strchr((char*)srcline,'\0');
+    lptr=strchr(srcline,'\0');
     assert(lptr!=NULL);
   } /* if */
 }
@@ -2497,12 +2497,12 @@ SC_FUNC int needtoken(int token)
 static int match(char *st,int end)
 {
   int k;
-  const unsigned char *ptr;
+  char *ptr;
 
   k=0;
   ptr=lptr;
   while (st[k]) {
-    if ((unsigned char)st[k]!=*ptr)
+    if (st[k]!=*ptr)
       return 0;
     k+=1;
     ptr+=1;
@@ -2582,10 +2582,10 @@ SC_FUNC void litremove(int pos)
  *        replaced by another character; the syntax '\ddd' is supported,
  *        but ddd must be decimal!
  */
-static cell litchar(const unsigned char **lptr,int flags)
+static cell litchar(char** lptr,int flags)
 {
   cell c=0;
-  const unsigned char *cptr;
+  char *cptr;
 
   cptr=*lptr;
   if ((flags & RAWMODE)!=0 || *cptr!=sc_ctrlchar) {  /* no escape character */

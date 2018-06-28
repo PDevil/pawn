@@ -40,9 +40,6 @@
   #include <setjmp.h>
 #endif
 
-#if !defined PAWN_CELL_SIZE
-  #define PAWN_CELL_SIZE 64 /* by default, maximum cell size = 64-bit */
-#endif
 #include "../amx/osdefs.h"
 #include "../amx/amx.h"
 
@@ -121,9 +118,10 @@ typedef struct s_statelist {
  *      label           generated hexadecimal number
  *      function        offset into code segment
  */
-typedef struct s_symbol {
-  struct s_symbol *next;
-  struct s_symbol *parent;  /* hierarchical types (multi-dimensional arrays) */
+struct symbol
+{
+  symbol *next;
+  symbol *parent;  /* hierarchical types (multi-dimensional arrays) */
 
   char name[sNAMEMAX+1];
   uint32_t hash;        /* value derived from name, for quicker searching */
@@ -163,11 +161,11 @@ typedef struct s_symbol {
   int fnumber;          /* file number for the declaration */
   int lnumber;          /* line number (in source file "fnumber") for the declaration */
 
-  struct s_symbol **refer;  /* referrer list, functions that "use" this symbol */
+  symbol **refer;  /* referrer list, functions that "use" this symbol */
   int numrefers;        /* number of entries in the referrer list */
 
   char *documentation;  /* optional documentation string */
-} symbol;
+};
 
 
 /*  Possible values for "ident"
@@ -536,8 +534,8 @@ int pc_error(int number,const char *message,const char *filename,int firstline,i
 void *pc_opensrc(const char *filename); /* reading only */
 void *pc_createsrc(const char *filename);
 void pc_closesrc(void *handle);   /* never delete */
-char *pc_readsrc(void *handle,unsigned char *target,int maxchars);
-int pc_writesrc(void *handle,const unsigned char *source);
+char* pc_readsrc(void *handle,char* target,int maxchars);
+int pc_writesrc(void *handle, char* source);
 void pc_clearpossrc(void);                        /* clear file position marks */
 void *pc_getpossrc(void *handle,void *position);  /* mark the current position */
 void pc_resetsrc(void *handle,void *position);    /* reset to a position marked earlier */
@@ -580,7 +578,7 @@ SC_FUNC void set_extension(char *filename,char *extension,int force);
 SC_FUNC symbol *fetchfunc(const char *name,int tag);
 SC_FUNC char *operator_symname(char *symname,char *opername,int tag1,int tag2,int numtags,int resulttag);
 SC_FUNC char *funcdisplayname(char *dest,const char *funcname);
-SC_FUNC int constexpr(cell *val,int *tag,symbol **symptr);
+SC_FUNC int constexpr_(cell *val,int *tag,symbol **symptr);
 SC_FUNC constvalue *append_constval(constvalue *table,const char *name,cell val,int index);
 SC_FUNC constvalue *find_constval(constvalue *table,char *name,int index);
 SC_FUNC void delete_consttable(constvalue *table);
@@ -602,7 +600,7 @@ SC_FUNC int plungefile(char *name,int try_currentpath,int try_includepaths);   /
 SC_FUNC char *strdel(char *str,size_t len);
 SC_FUNC char *strins(char *dest,char *src,size_t srclen);
 SC_FUNC void preprocess(void);
-SC_FUNC void lex_fetchindent(const unsigned char *string,const unsigned char *pos);
+SC_FUNC void lex_fetchindent(const char* string, const char* pos);
 SC_FUNC int lex_adjusttabsize(int matchindent);
 SC_FUNC int lexinit(int releaseall);
 SC_FUNC int lex(cell *lexvalue,char **lexsym);
@@ -775,7 +773,7 @@ SC_FUNC const stringpair *find_subst(const char *name,int length);
 SC_FUNC int delete_subst(const char *name,int length);
 SC_FUNC void delete_substtable(void);
 SC_FUNC stringlist *insert_sourcefile(const char *string);
-SC_FUNC const char *get_sourcefile(int index);
+SC_FUNC char*get_sourcefile(int index);
 SC_FUNC void delete_sourcefiletable(void);
 SC_FUNC stringlist *insert_inputfile(const char *path);
 SC_FUNC const char *get_inputfile(int index);
@@ -819,8 +817,8 @@ SC_FUNC int mfputs(memfile_t *mf,const char *string);
 #define MAXCODEPAGE 12
 SC_FUNC int cp_path(const char *root,const char *directory);
 SC_FUNC int cp_set(const char *name);
-SC_FUNC cell cp_translate(const unsigned char *string,const unsigned char **endptr);
-SC_FUNC cell get_utf8_char(const unsigned char *string,const unsigned char **endptr);
+SC_FUNC cell cp_translate(char *string, char **endptr);
+SC_FUNC cell get_utf8_char(char *string, char **endptr);
 SC_FUNC int scan_utf8(FILE *fp,const char *filename);
 
 /* function prototypes in SCSTATE.C */
@@ -847,8 +845,8 @@ SC_FUNC void delete_statelisttable(statelist *root);
 SC_VDECL symbol loctab;       /* local symbol table */
 SC_VDECL symbol glbtab;       /* global symbol table */
 SC_VDECL cell *litq;          /* the literal queue */
-SC_VDECL unsigned char *srcline;/* the line read from the input file */
-SC_VDECL const unsigned char *lptr;/* points to the current position in "srcline" */
+SC_VDECL char *srcline;		  /* the line read from the input file */
+SC_VDECL char *lptr;		  /* points to the current position in "srcline" */
 SC_VDECL constvalue tagname_tab;/* tagname table */
 SC_VDECL constvalue libname_tab;/* library table (#pragma library "..." syntax) */
 SC_VDECL constvalue *curlibrary;/* current library */

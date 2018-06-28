@@ -425,13 +425,13 @@ SC_FUNC int phopt_init(void)
 
   /* expand all strings */
   for (i=0; i<number-1; i++) {
-    int len = strexpand(str,(unsigned char*)sequences_cmp[i].find,sizeof str,SCPACK_TABLE);
+    int len = strexpand(str,sequences_cmp[i].find,sizeof str,SCPACK_TABLE);
     assert(len<=sizeof str);
     assert(len==(int)strlen(str)+1);
     sequences[i].find=(char*)malloc(len);
     if (sequences[i].find!=NULL)
       strcpy((char*)sequences[i].find,str);
-    len = strexpand(str,(unsigned char*)sequences_cmp[i].replace,sizeof str,SCPACK_TABLE);
+    len = strexpand(str,sequences_cmp[i].replace,sizeof str,SCPACK_TABLE);
     assert(len<=sizeof str);
     assert(len==(int)strlen(str)+1);
     sequences[i].replace=(char*)malloc(len);
