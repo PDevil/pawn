@@ -55,13 +55,14 @@
   #include <alloc/fortify.h>
 #endif
 
-typedef struct s_statepool {
-  struct s_statepool *next;
-  int *states;          /* list of states in this combination */
-  int numstates;        /* number of items in the above list */
-  int fsa;              /* automaton id */
-  int listid;           /* unique id for this combination list */
-} statepool;
+struct statepool
+{
+	statepool *next;
+	int *states;          /* list of states in this combination */
+	int numstates;        /* number of items in the above list */
+	int fsa;              /* automaton id */
+	int listid;           /* unique id for this combination list */
+};
 
 static statepool statepool_tab = { NULL, NULL, 0, 0, 0};   /* state combinations table */
 

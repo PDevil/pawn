@@ -57,21 +57,22 @@
 #define PREPROC_TERM  '\x7f'/* termination character for preprocessor expressions (the "DEL" code) */
 #define sDEF_PREFIX   "default.inc" /* default prefix filename */
 
-typedef union {
+union stkitem
+{
   void *pv;                 /* e.g. a name */
   int i;
-} stkitem;                  /* type of items stored on the compiler stack */
+};                  /* type of items stored on the compiler stack */
 
 /*  Equate table, tagname table, library table, ... */
-typedef struct s_constvalue {
-  struct s_constvalue *next;
+struct constvalue {
+  constvalue *next;
   char name[sNAMEMAX+1];
   cell value;
   int index;            /* tag for symbolic-array fields; automaton id. for states and automatons */
   char usage;           /* currently only for pseudo-arrays in symbolic-array fields */
-} constvalue;
+};
 
-typedef struct s_arginfo {  /* function argument info */
+struct arginfo {  /* function argument info */
   char name[sNAMEMAX+1];
   char ident;           /* iVARIABLE, iREFERENCE, iREFARRAY or iVARARGS */
   char usage;           /* uCONST, uPACKED */
@@ -98,15 +99,15 @@ typedef struct s_arginfo {  /* function argument info */
     } array;
   } defvalue;           /* default value, or pointer to default array */
   int defvalue_tag;     /* tag of the default value */
-} arginfo;
+};
 
-typedef struct s_statelist {
-  struct s_statelist *next;
+struct statelist {
+  statelist *next;
   int label;            /* code label (for functions), or overlay index */
   cell addr;            /* code start address (for functions) */
   cell endaddr;         /* code end address (for functions) */
   int id;               /* state-list id */
-} statelist;
+};
 
 /*  Symbol table format
  *
@@ -139,22 +140,25 @@ struct symbol
   int compound;         /* compound level (braces nesting level) */
   int tag;              /* tagname id */
 
-  union {
+  union					/* 'x' for 'extra' */
+  {
     int declared;       /* label: how many local variables are declared */
     constvalue *lib;    /* native function: library it is part of */
     long stacksize;     /* normal/public function: stack requirements */
     int enumlist;       /* enumerated constants: unique sequence number */
     int lnumber_write;  /* variable/array: line number of last assigment */
-  } x;                  /* 'x' for 'extra' */
+  } x;
 
-  union {
+  union                 /* for 'dimension', both functions and arrays */
+  {
     arginfo *arglist;   /* types of all parameters for functions */
-    struct {
+    struct
+	{
       cell length;      /* arrays: length (size) of this dimension */
       short level;      /* number of dimensions below this level */
       constvalue *names;/* for symbolic dimensions, the name list */
     } array;
-  } dim;                /* for 'dimension', both functions and arrays */
+  } dim;
 
   statelist *states;    /* list of state function/state variable ids + addresses */
   int fvisible;         /* static global variables: file number of the declaration (for visibility test) */
@@ -260,7 +264,7 @@ struct symbol
 
 #define FALLBACK  -1    /* state id for the fallback function */
 
-typedef struct s_value {
+struct value {
   symbol *sym;          /* symbol in symbol table, NULL for (constant) expression */
   cell constval;        /* value of the constant expression (if ident==iCONSTEXPR)
                          * also used for the size of a literal array */
@@ -270,7 +274,7 @@ typedef struct s_value {
   char boolresult;      /* boolean result for relational operators */
   char ispacked;        /* to flag "packed arrays" for literal arrays and for pseudo-arrays */
   cell *arrayidx;       /* last used array indices, for checking self assignment */
-} value;
+};
 
 /*  "while" statement queue (also used for "for" and "do - while" loops) */
 enum {
@@ -300,35 +304,35 @@ enum {
 
 /* general purpose list for the list of source/include files, documentation
    strings (explicit and parsed information) & debug strings */
-typedef struct s_stringlist {
-  struct s_stringlist *next;
+struct stringlist {
+  stringlist *next;
   char *text;
-} stringlist;
+};
 
 /* general purpose list for #define macros and aliases for native functions */
-typedef struct s_stringpair {
-  struct s_stringpair *next;
+struct stringpair {
+  stringpair *next;
   char *first;
   char *second;
   int matchlength;
-} stringpair;
+};
 
 /* general purpose list, which is currently only used to determine heap usage in
    conditional branches (so the maximum of both branches can be established) */
-typedef struct s_valuepair {
-  struct s_valuepair *next;
+struct valuepair {
+  valuepair *next;
   long first;
   long second;
-} valuepair;
+};
 
 /* list to collect literal strings and literal arrays, so that these can be
    merged */
-typedef struct s_arraymerge {
-  struct s_arraymerge *next;
+struct arraymerge {
+  arraymerge *next;
   cell addr;            /* base address of the array */
   cell size;            /* array size in cells */
   cell *data;           /* buffer with the array data ("size" cells long) */
-} arraymerge;
+};
 
 /* macros for code generation */
 #define opcodes(n)      ((n)*pc_cellsize)   /* opcode size */

@@ -257,9 +257,10 @@ SC_FUNC void stgout(int index)
   pipeidx=0;  /* reset second pipe */
 }
 
-typedef struct {
-  char *start,*end;
-} argstack;
+struct argstack
+{
+	char *start, *end;
+};
 
 /*  stgstring
  *

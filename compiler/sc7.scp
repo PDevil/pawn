@@ -53,11 +53,13 @@ const unsigned char sequences_table[][2] = {
 };
 /*-*SCPACK end of pair table, do not change or remove this line */
 
-typedef struct {
+struct SEQUENCE
+{
   const char *find;
   const char *replace;
   short opc,arg;        /* number of opcodes/arguments saved (may be negative!) */
-} SEQUENCE;
+};
+
 static const char separator_macro[] = {sOPTIMIZE_MACRO,'\0'};
 static const char separator_full[] = {sOPTIMIZE_FULL,'\0'};
 static const SEQUENCE sequences_cmp[] = {

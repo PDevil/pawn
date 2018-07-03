@@ -39,13 +39,14 @@ static void append_dbginfo(FILE *fout);
 
 typedef cell (*OPCODE_PROC)(FILE *fbin,const char *params,cell opcode,cell cip);
 
-typedef struct {
+struct OPCODE
+{
   cell opcode;
   char *name;
   int segment;          /* sIN_CSEG=parse in cseg, sIN_DSEG=parse in dseg */
   OPCODE_PROC func;
   int opt_level;        /* optimization level for this instruction set */
-} OPCODE;
+};
 
 static cell *lbltab;    /* label table */
 static int writeerror;

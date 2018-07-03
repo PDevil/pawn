@@ -252,10 +252,11 @@ typedef int (AMXAPI *AMX_IDLE)(struct tagAMX *amx, int AMXAPI Exec(struct tagAMX
   #endif
 #endif
 
-typedef struct tagAMX_NATIVE_INFO {
+struct PACKED AMX_NATIVE_INFO
+{
   const char _FAR *name;
   AMX_NATIVE func;
-} PACKED AMX_NATIVE_INFO;
+};
 
 #if !defined AMX_USERNUM
 #define AMX_USERNUM     4
@@ -263,20 +264,23 @@ typedef struct tagAMX_NATIVE_INFO {
 #define sEXPMAX         19  /* maximum name length for file version <= 6 */
 #define sNAMEMAX        31  /* maximum name length of symbol name */
 
-typedef struct tagFUNCSTUB {
+struct PACKED AMX_FUNCSTUB
+{
   uint32_t address;
   uint32_t nameofs;
-} PACKED AMX_FUNCSTUB;
+};
 
-typedef struct tagOVERLAYINFO {
+struct PACKED AMX_OVERLAYINFO
+{
   int32_t offset;           /* offset relative to the start of the code block */
   int32_t size;             /* size in bytes */
-} PACKED AMX_OVERLAYINFO;
+};
 
 /* The AMX structure is the internal structure for many functions. Not all
  * fields are valid at all times; many fields are cached in local variables.
  */
-typedef struct tagAMX {
+struct PACKED AMX
+{
   unsigned char _FAR *base; /* points to the AMX header, perhaps followed by P-code and data */
   unsigned char _FAR *code; /* points to P-code block, possibly in ROM or in an overlay pool */
   unsigned char _FAR *data; /* points to separate data+stack+heap, may be NULL */
@@ -314,12 +318,13 @@ typedef struct tagAMX {
     /* support variables for the JIT */
     int reloc_size;         /* required temporary buffer for relocations */
   #endif
-} PACKED AMX;
+};
 
 /* The AMX_HEADER structure is both the memory format as the file format. The
  * structure is used internaly.
  */
-typedef struct tagAMX_HEADER {
+struct PACKED AMX_HEADER
+{
   int32_t size;             /* size of the "file" */
   uint16_t magic;           /* signature */
   char    file_version;     /* file format version */
@@ -338,7 +343,7 @@ typedef struct tagAMX_HEADER {
   int32_t tags;             /* offset to the "public tagnames" table */
   int32_t nametable;        /* offset to the name table */
   int32_t overlays;         /* offset to the overlay table */
-} PACKED AMX_HEADER;
+};
 
 #define AMX_MAGIC_16    0xf1e2
 #define AMX_MAGIC_32    0xf1e0

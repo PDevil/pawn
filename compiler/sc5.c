@@ -51,10 +51,11 @@
 #endif
 
 #define NUM_WARNINGS    (sizeof warnmsg / sizeof warnmsg[0])
-typedef struct s_warnstack {
-  struct s_warnstack *next;
-  unsigned char mask[(NUM_WARNINGS + 7) / 8]; /* 8 flags in a char */
-} warnstack;
+struct warnstack
+{
+	warnstack* next;
+	unsigned char mask[(NUM_WARNINGS + 7) / 8]; /* 8 flags in a char */
+};
 /* the root entry holds the active flags, any other allocated entries contain
  * "pushed" flags
  */

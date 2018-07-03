@@ -58,7 +58,8 @@ extern  "C" {
   #endif
 #endif
 
-typedef struct tagAMX_DBG_HDR {
+struct PACKED AMX_DBG_HDR
+{
   int32_t  size;            /* size of the debug information chunk */
   uint16_t magic;           /* signature, must be 0xf1ef */
   char     file_version;    /* file format version */
@@ -70,20 +71,23 @@ typedef struct tagAMX_DBG_HDR {
   int16_t  tags;            /* number of entries in the "tag" table */
   int16_t  automatons;      /* number of entries in the "automaton" table */
   int16_t  states;          /* number of entries in the "state" table */
-} PACKED AMX_DBG_HDR;
+};
 #define AMX_DBG_MAGIC   0xf1ef
 
-typedef struct tagAMX_DBG_FILE {
+struct PACKED AMX_DBG_FILE
+{
   uint32_t address;         /* address in the code segment where generated code (for this file) starts */
   char     name[1];         /* ASCII string, zero-terminated */
-} PACKED AMX_DBG_FILE;
+};
 
-typedef struct tagAMX_DBG_LINE {
+struct PACKED AMX_DBG_LINE
+{
   uint32_t address;         /* address in the code segment where generated code (for this line) starts */
   int32_t  line;            /* line number */
-} PACKED AMX_DBG_LINE;
+};
 
-typedef struct tagAMX_DBG_SYMBOL {
+struct PACKED AMX_DBG_SYMBOL
+{
   uint32_t address;         /* address in the data segment or relative to the frame */
   int16_t  tag;             /* tag for the symbol */
   uint32_t codestart;       /* address in the code segment from which this symbol is valid (in scope) */
@@ -92,31 +96,36 @@ typedef struct tagAMX_DBG_SYMBOL {
   char     scope;           /* class of symbol (global/local) */
   int16_t  dim;             /* number of dimensions */
   char     name[1];         /* ASCII string, zero-terminated */
-} PACKED AMX_DBG_SYMBOL;
+};
 
-typedef struct tagAMX_DBG_SYMDIM {
+struct PACKED AMX_DBG_SYMDIM
+{
   int16_t  tag;             /* tag for the array dimension */
   uint32_t size;            /* size of the array dimension */
-} PACKED AMX_DBG_SYMDIM;
+};
 
-typedef struct tagAMX_DBG_TAG {
+struct PACKED AMX_DBG_TAG
+{
   int16_t  tag;             /* tag id */
   char     name[1];         /* ASCII string, zero-terminated */
-} PACKED AMX_DBG_TAG;
+};
 
-typedef struct tagAMX_DBG_MACHINE {
+struct PACKED AMX_DBG_MACHINE
+{
   int16_t  automaton;       /* automaton id */
   uint32_t address;         /* address of state variable */
   char     name[1];         /* ASCII string, zero-terminated */
-} PACKED AMX_DBG_MACHINE;
+};
 
-typedef struct tagAMX_DBG_STATE {
+struct PACKED AMX_DBG_STATE
+{
   int16_t  state;           /* state id */
   int16_t  automaton;       /* automaton id */
   char     name[1];         /* ASCII string, zero-terminated */
-} PACKED AMX_DBG_STATE;
+};
 
-typedef struct tagAMX_DBG {
+struct PACKED AMX_DBG
+{
   AMX_DBG_HDR     *hdr;     /* points to the AMX_DBG header */
   AMX_DBG_FILE    **filetbl;
   AMX_DBG_LINE    *linetbl;
@@ -124,7 +133,7 @@ typedef struct tagAMX_DBG {
   AMX_DBG_TAG     **tagtbl;
   AMX_DBG_MACHINE **automatontbl;
   AMX_DBG_STATE   **statetbl;
-} PACKED AMX_DBG;
+};
 
 #if !defined iVARIABLE
   #define iVARIABLE  1  /* cell that has an address and that can be fetched directly (lvalue) */
